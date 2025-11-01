@@ -1,0 +1,11 @@
+[package.metadata.android]
+package = "com.rustjack.mobile"
+label = "Rustjack"
+apk_name = "rustjack-mobile"
+
+[package.metadata.android.sdk]
+min_sdk_version = 24
+target_sdk_version = 36
+
+[[package.metadata.android.uses_permission]]
+name = "android.permission.INTERNET"
