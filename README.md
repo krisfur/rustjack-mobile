@@ -2,6 +2,7 @@
 Mobile version of Rustjack, using eGUI.
 
 ![screenshot](screenshot.jpg)
+![screenshot2](screenshot2.jpg)
 
 ## compile for desktop
 ```bash
