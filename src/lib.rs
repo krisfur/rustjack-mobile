@@ -1,5 +1,3 @@
-
-
 mod game;
 
 use eframe::egui;
@@ -11,6 +9,7 @@ use android_activity::AndroidApp;
 pub fn run_app() -> eframe::Result<()> {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
+            // Set the initial base size
             .with_inner_size([400.0, 600.0]),
         ..Default::default()
     };
@@ -33,6 +32,9 @@ fn android_main(app: AndroidApp) {
     );
 
     let options = eframe::NativeOptions {
+        viewport: egui::ViewportBuilder::default()
+            // Set the initial base size here as well
+            .with_inner_size([400.0, 600.0]),
         android_app: Some(app),
         ..Default::default()
     };
@@ -148,16 +150,56 @@ impl BlackjackApp {
 
 impl eframe::App for BlackjackApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        // --- START OF SCALING LOGIC ---
+
+        // Define a base size for scaling, matching your initial window size
+        const BASE_WIDTH: f32 = 400.0;
+        const BASE_HEIGHT: f32 = 600.0;
+
+        // Get the current pixels_per_point value (the scale from the last frame)
+        let current_ppp = ctx.pixels_per_point();
+
+        // Get the rect we are painting to, in points.
+        // and `input().viewport().inner_rect` for eframe 0.33.0.
+        // It is not optional and should be stable during resizes.
+        let screen_rect_points = ctx.content_rect();
+
+        // Calculate the window's inner size in physical pixels by reversing the scaling.
+        let screen_rect_pixels = screen_rect_points.size() * current_ppp;
+        let current_width_pixels = screen_rect_pixels.x;
+        let current_height_pixels = screen_rect_pixels.y;
+
+        // Calculate the new scaling factor based on the stable physical pixel size.
+        // Our base size is in points, which we assume is at a 1.0 scaling.
+        let scale_w = current_width_pixels / BASE_WIDTH;
+        let scale_h = current_height_pixels / BASE_HEIGHT;
+
+        // Use the minimum scaling factor to fit the UI without distortion
+        let scale_factor = scale_w.min(scale_h).max(0.5); // Don't let it get too small
+
+        // Set egui's global scaling factor (pixels per point)
+        // We only set it if it has meaningfully changed to avoid unnecessary re-draws.
+        if (scale_factor - current_ppp).abs() > 0.001 {
+            ctx.set_pixels_per_point(scale_factor);
+        }
+
+        // --- END OF SCALING LOGIC ---
+
+        // The sizes (e.g., 20.0, 24.0, 120.0) are in "points",
+        // and egui will scale them using the `pixels_per_point` factor we just set.
+
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.vertical_centered(|ui| {
-                ui.add_space(20.0);
+                ui.add_space(30.0); // This 30.0 is in points, scales automatically
 
+                // This 24.0 is in points, scales automatically
                 ui.heading(egui::RichText::new("♠ BLACKJACK ♥").size(24.0));
 
                 ui.add_space(20.0);
                 ui.separator();
                 ui.add_space(10.0);
 
+                // This uses the default "Heading" text style, which is also scaled
                 ui.heading("DEALER");
                 ui.add_space(5.0);
 
@@ -165,6 +207,7 @@ impl eframe::App for BlackjackApp {
                     GameState::PlayerTurn => {
                         let cards = self.dealer_hand.display_str();
                         let visible = cards.split_once(' ').map(|(_, rest)| rest).unwrap_or("");
+                        // This uses the default "Body" text style, scaled
                         ui.label(format!("Cards: [??] {}", visible));
                         ui.label("Value: ???");
                     }
@@ -190,6 +233,7 @@ impl eframe::App for BlackjackApp {
                 match self.state {
                     GameState::PlayerTurn => {
                         ui.horizontal(|ui| {
+                            // This size is in points and will be scaled
                             let button_size = egui::vec2(120.0, 40.0);
                             let spacing = ui.style().spacing.item_spacing.x;
                             let total_buttons_width = button_size.x * 2.0 + spacing;
@@ -220,7 +264,7 @@ impl eframe::App for BlackjackApp {
                     GameState::RoundEnd => {
                         ui.label(
                             egui::RichText::new(&self.round_result)
-                                .size(18.0)
+                                .size(18.0) // This 18.0 is in points, scales
                                 .strong(),
                         );
                         ui.add_space(10.0);

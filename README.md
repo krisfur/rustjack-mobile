@@ -17,5 +17,5 @@ bash build_android.sh
 you may need the android SDK tools in your path to make adb work:
 
 ```bash
-export PATH=$PATH:~/Android/Sdk/platform-tools`
+export PATH=$PATH:~/Android/Sdk/platform-tools
 ```
