@@ -190,10 +190,10 @@ impl eframe::App for BlackjackApp {
 
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.vertical_centered(|ui| {
-                ui.add_space(30.0); // This 30.0 is in points, scales automatically
+                ui.add_space(100.0); // This 80.0 is in points, scales automatically
 
                 // This 24.0 is in points, scales automatically
-                ui.heading(egui::RichText::new("♠ BLACKJACK ♥").size(24.0));
+                ui.heading(egui::RichText::new("♠ BLACKJACK ♥").size(26.0));
 
                 ui.add_space(20.0);
                 ui.separator();
@@ -264,7 +264,7 @@ impl eframe::App for BlackjackApp {
                     GameState::RoundEnd => {
                         ui.label(
                             egui::RichText::new(&self.round_result)
-                                .size(18.0) // This 18.0 is in points, scales
+                                .size(22.0) // This 18.0 is in points, scales
                                 .strong(),
                         );
                         ui.add_space(10.0);
